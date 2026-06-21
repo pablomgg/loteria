@@ -1,0 +1,113 @@
+name: ci-api
+
+on:
+  push:
+    branches:
+      - develop
+    paths:
+      - 'backend/**'
+      - '.github/workflows/ci-worker.yaml'
+
+  pull_request:
+    branches:
+      - develop
+      - master
+    paths:
+      - 'backend/**'
+      - '.github/workflows/ci-worker.yaml'
+
+  workflow_dispatch:
+    inputs:
+      branch:
+        description: 'Branch para buildar'
+        required: false
+        default: 'master'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-worker-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  continuous-integration:
+    runs-on: ubuntu-latest
+
+    env:
+      SELECTED_BRANCH: ${{ inputs.branch != '' && inputs.branch || github.head_ref || github.ref_name }}
+      REGISTRY_HOST: ${{ vars.REGISTRY_HOST }}
+      REGISTRY_USER: ${{ vars.REGISTRY_USER }}
+      RUN_TEST: 'false'
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4.2.0
+        with:
+          ref: ${{ env.SELECTED_BRANCH }}
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v5
+        with:
+          dotnet-version: 10.0.x
+
+      - name: Restore
+        run: dotnet restore ./backend/Loteria.sln
+
+      - name: Build
+        run: dotnet build ./backend/Loteria.sln --configuration Release --no-restore
+
+      - name: Test
+        if: env.RUN_TEST == 'true'
+        run: dotnet test ./backend/Loteria.sln --configuration Release --no-build --verbosity normal
+
+      - name: Capturar SHA do commit checado
+        id: sha
+        shell: bash
+        run: echo "sha=$(git rev-parse HEAD)" >> $GITHUB_OUTPUT
+
+      - name: Montar lista de tags
+        id: tags
+        run: |
+          T1="${{ vars.REGISTRY_HOST }}/loteria-console:${{ env.SELECTED_BRANCH }}-${{ steps.sha.outputs.sha }}"
+          if [ "${{ env.SELECTED_BRANCH }}" = "master" ]; then
+            # master recebe também :latest global
+            T2="${{ vars.REGISTRY_HOST }}/loteria-console:latest"
+          else
+            # demais branches recebem <branch>-latest
+            T2="${{ vars.REGISTRY_HOST }}/loteria-console:${{ env.SELECTED_BRANCH }}-latest"
+          fi
+          echo "tags=$T1,$T2" >> $GITHUB_OUTPUT
+
+      - name: Docker build validation
+        if: github.event_name == 'pull_request'
+        uses: docker/build-push-action@v6
+        with:
+          context: ./backend
+          file: ./backend/Dockerfile
+          push: false
+          tags: ${{ steps.tags.outputs.tags }}
+
+      - name: Login Docker Registry
+        if: github.event_name != 'pull_request'
+        uses: docker/login-action@v4
+        with:
+          registry: ${{ env.REGISTRY_HOST }}
+          username: ${{ env.REGISTRY_USER }}
+          password: ${{ secrets.REGISTRY_PWD }}
+
+      - name: Build and push API image
+        if: github.event_name != 'pull_request'
+        uses: docker/build-push-action@v6
+        with:
+          context: ./backend
+          file: ./backend/Dockerfile
+          push: true
+          tags: ${{ steps.tags.outputs.tags }}
+
+      - name: Summary
+        if: github.event_name != 'pull_request'
+        run: |
+          echo "## Imagem gerada" >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          echo "Tag: \`${{ steps.tags.outputs.tags }}\`" >> "$GITHUB_STEP_SUMMARY"

@@ -1,0 +1,343 @@
+# =========================================================
+# Project
+# =========================================================
+
+# Root expected files:
+# - .gitignore
+# - .gitattributes
+# - README.md
+# - frontend/
+# - backend/
+# - docker/
+
+
+# =========================================================
+# OS / system files
+# =========================================================
+
+.DS_Store
+.AppleDouble
+.LSOverride
+._*
+.Spotlight-V100
+.Trashes
+
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+
+# =========================================================
+# Secrets / environment files
+# =========================================================
+
+.env
+.env.*
+!.env.example
+!.env.template
+!.env.sample
+
+*.local
+*.secret
+*.secrets
+
+*.pem
+*.key
+*.crt
+*.cer
+*.pfx
+*.p12
+*.publishsettings
+
+
+# =========================================================
+# Logs / temporary files
+# =========================================================
+
+logs/
+*.log
+*.tmp
+*.tmp_proj
+*.pid
+*.seed
+*.pid.lock
+*.svclog
+
+tmp/
+temp/
+.cache/
+.history/
+
+*.swp
+*.swo
+*~
+~$*
+
+
+# =========================================================
+# IDEs / editors
+# Rider, WebStorm, DataGrip, VS Code, Visual Studio
+# =========================================================
+
+.idea/
+.idea_modules/
+*.iml
+*.iws
+*.ipr
+
+.vscode/
+.vs/
+
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+*.rsuser
+*.userprefs
+
+*.DotSettings.user
+
+_ReSharper*/
+*_ReSharper*/
+_ReSharper.*
+*.[Rr]e[Ss]harper
+
+.JustCode
+_TeamCity*
+
+
+# =========================================================
+# Angular / Node - frontend/
+# =========================================================
+
+frontend/node_modules/
+frontend/.angular/
+frontend/.cache/
+frontend/.nx/
+
+frontend/dist/
+frontend/out-tsc/
+frontend/tmp/
+frontend/temp/
+
+frontend/coverage/
+frontend/.nyc_output/
+
+frontend/.eslintcache
+frontend/.stylelintcache
+
+frontend/.npm/
+frontend/.pnpm-store/
+frontend/.yarn/cache/
+frontend/.yarn/unplugged/
+frontend/.yarn/build-state.yml
+frontend/.yarn/install-state.gz
+
+*.tsbuildinfo
+
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# Keep package lock files versioned
+!frontend/package-lock.json
+!frontend/pnpm-lock.yaml
+!frontend/yarn.lock
+
+
+# =========================================================
+# .NET / C# - backend/
+# =========================================================
+
+backend/**/[Bb]in/
+backend/**/[Oo]bj/
+backend/**/[Oo]ut/
+backend/**/[Pp]ublish/
+
+backend/**/[Dd]ebug/
+backend/**/[Dd]ebugPublic/
+backend/**/[Rr]elease/
+backend/**/[Rr]eleases/
+backend/**/[Xx]64/
+backend/**/[Xx]86/
+backend/**/[Bb]uild/
+backend/**/bld/
+
+backend/**/[Tt]est[Rr]esult*/
+backend/**/[Bb]uild[Ll]og.*
+backend/**/TestResults/
+backend/**/test-results/
+
+backend/**/coverage/
+backend/**/coverage.cobertura.xml
+backend/**/coverage.opencover.xml
+backend/**/*.coverage
+backend/**/*.coveragexml
+
+backend/**/GeneratedFiles/
+backend/**/Generated_Code/
+backend/**/GeneratedArtifacts/
+
+backend/**/artifacts/
+backend/**/.dotnet/
+backend/**/.nuget/
+
+backend/**/*.tmp
+backend/**/*.cache
+backend/**/*.cachefile
+
+backend/**/*.nupkg
+backend/**/*.snupkg
+
+backend/**/efbundle
+backend/**/efbundle.exe
+
+# Common Visual Studio / MSBuild generated files
+*.ilk
+*.meta
+*.obj
+*.pch
+*.pdb
+*.pgc
+*.pgd
+*.rsp
+*.sbr
+*.tlb
+*.tli
+*.tlh
+*.vspscc
+*.vssscc
+*.scc
+.builds
+
+# Keep important .NET project files versioned
+!backend/**/*.sln
+!backend/**/*.csproj
+!backend/**/*.fsproj
+!backend/**/*.vbproj
+!backend/**/*.props
+!backend/**/*.targets
+!backend/**/packages.lock.json
+
+
+# =========================================================
+# NuGet
+# =========================================================
+
+*.nupkg
+*.snupkg
+
+**/packages/*
+!**/packages/build/
+
+*.nuget.props
+*.nuget.targets
+
+
+# =========================================================
+# .NET tooling / test tools
+# =========================================================
+
+# DotCover
+*.dotCover
+
+# NCrunch
+_NCrunch_*
+.*crunch*.local.xml
+nCrunchTemp_*
+
+# Chutzpah
+_Chutzpah*
+
+# StyleCop
+[Ss]tyle[Cc]op.*
+
+# Fakes
+FakesAssemblies/
+
+# Paket / FAKE
+.paket/paket.exe
+.fake/
+
+
+# =========================================================
+# Publish / deploy
+# =========================================================
+
+publish/
+[Pp]ublish/
+
+*.[Pp]ublish.xml
+*.pubxml
+*.azurePubxml
+*.publishproj
+
+
+# =========================================================
+# Docker
+# =========================================================
+
+docker/.env
+docker/.env.*
+!docker/.env.example
+!docker/.env.template
+!docker/.env.sample
+
+docker/data/
+docker/volumes/
+docker/.data/
+docker/tmp/
+docker/temp/
+
+docker/docker-compose.override.yml
+docker/compose.override.yml
+docker/*override*.yml
+docker/*override*.yaml
+
+docker-extract/
+docker-extract
+
+
+# =========================================================
+# Database / local data
+# =========================================================
+
+*.db
+*.sqlite
+*.sqlite3
+*.bak
+*.dump
+
+*.mdf
+*.ldf
+
+*.dbmdl
+*.dbproj.schemaview
+
+
+# =========================================================
+# Reports / coverage / tests - generic
+# =========================================================
+
+coverage/
+.nyc_output/
+test-results/
+playwright-report/
+blob-report/
+
+*.lcov
+TestResults/
+[Tt]est[Rr]esult*/
+TestResult.xml
+*.VisualState.xml
+
+
+# =========================================================
+# Generic build outputs
+# =========================================================
+
+dist/
+build/
+out/
