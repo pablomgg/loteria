@@ -1,0 +1,13 @@
+**/bin
+**/obj
+.git
+.github
+.vs
+.vscode
+.idea
+*.user
+*.suo
+*.cache
+Dockerfile
+docker-compose*
+README*

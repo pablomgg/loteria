@@ -6,6 +6,8 @@ COPY ./*.sln ./
 COPY src/*/*.csproj ./
 RUN for file in $(ls *.csproj); do mkdir -p src/${file%.*}/ && mv $file src/${file%.*}/; done
 
+RUN dotnet restore ./Loteria.sln
+
 COPY . .
 
 WORKDIR /sln/src/Loteria.Console
