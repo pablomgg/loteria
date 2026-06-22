@@ -16,8 +16,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "scripts", "scripts", "{DB8A
 		scripts\DML.sql = scripts\DML.sql
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Loteria.Analise.Console", "src\Loteria.Analise.Console\Loteria.Analise.Console.csproj", "{471D3EB9-3442-4F70-83F6-D0587952B254}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -36,15 +34,10 @@ Global
 		{CC515A3C-58D2-4499-98C0-ECCAFA0B4B25}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{CC515A3C-58D2-4499-98C0-ECCAFA0B4B25}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{CC515A3C-58D2-4499-98C0-ECCAFA0B4B25}.Release|Any CPU.Build.0 = Release|Any CPU
-		{471D3EB9-3442-4F70-83F6-D0587952B254}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{471D3EB9-3442-4F70-83F6-D0587952B254}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{471D3EB9-3442-4F70-83F6-D0587952B254}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{471D3EB9-3442-4F70-83F6-D0587952B254}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{00DBCF3E-F99F-46B9-A513-A0E04329A0CE} = {2E2CFA0D-E237-496B-962B-286650015DFF}
 		{CC515A3C-58D2-4499-98C0-ECCAFA0B4B25} = {2E2CFA0D-E237-496B-962B-286650015DFF}
 		{ACD98E9B-5115-4374-90C6-497B0B8DD0F2} = {2E2CFA0D-E237-496B-962B-286650015DFF}
-		{471D3EB9-3442-4F70-83F6-D0587952B254} = {2E2CFA0D-E237-496B-962B-286650015DFF}
 	EndGlobalSection
 EndGlobal
