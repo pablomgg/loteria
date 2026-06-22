@@ -10,6 +10,6 @@ data:
   OpenTelemetry__Jaeger__ServiceName: "loteria-console"
   OpenTelemetry__Jaeger__ServiceVersion: "1.0.0"
   LoteriaApi__BaseUrl: "https://servicebus3.caixa.gov.br/portaldeloterias/api"
-  LoteriaApi__Throttle: 1100
-  LoteriaApi__TimeoutSeconds: 60
+  LoteriaApi__Throttle: "1100"
+  LoteriaApi__TimeoutSeconds: "60"
   App__ExecutionMode: "Daily"
