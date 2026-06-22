@@ -64,7 +64,7 @@ jobs:
       - name: Capturar SHA do commit checado
         id: sha
         shell: bash
-        run: echo "sha=$(git rev-parse HEAD)" >> $GITHUB_OUTPUT
+        run: echo "sha=$(git rev-parse --short=12 HEAD)" >> $GITHUB_OUTPUT
 
       - name: Montar lista de tags
         id: tags
