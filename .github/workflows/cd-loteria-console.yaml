@@ -1,0 +1,233 @@
+name: cd-loteria-console
+
+on:
+  workflow_run:
+    workflows:
+      - ci-loteria-console
+    types:
+      - completed
+
+  workflow_dispatch:
+    inputs:
+      image_tag:
+        description: 'Tag da imagem para deploy. Ex: develop-latest, develop-abc123def456'
+        required: true
+        default: 'develop-latest'
+
+      namespace:
+        description: 'Namespace Kubernetes'
+        required: false
+        default: 'ns-loteria'
+
+      manifest_branch:
+        description: 'Branch onde estão os manifests'
+        required: false
+        default: 'master'
+
+      run_now:
+        description: 'Criar um Job manual após aplicar o CronJob? true/false'
+        required: false
+        default: 'false'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: cd-loteria-console-${{ github.event_name == 'workflow_dispatch' && inputs.namespace || github.event.workflow_run.head_branch || 'manual' }}
+  cancel-in-progress: false
+
+jobs:
+  continuous-deployment:
+    name: Deploy worker
+
+    if: >
+      github.event_name == 'workflow_dispatch' ||
+      (
+        github.event.workflow_run.conclusion == 'success' &&
+        github.event.workflow_run.event == 'push' &&
+        github.event.workflow_run.head_branch == 'develop'
+      )
+
+    runs-on: ubuntu-latest
+
+    environment:
+      name: develop
+
+    env:
+      REGISTRY_HOST: ${{ vars.REGISTRY_HOST }}
+      IMAGE_REPOSITORY: ${{ vars.REGISTRY_HOST }}/dev/loteria-console
+      DEFAULT_NAMESPACE: ns-loteria
+      K8S_SOURCE_DIR: k8s
+      K8S_RENDER_DIR: /tmp/k8s-render
+      CRONJOB_NAME: loteria-console-daily
+
+    steps:
+      - name: Checkout manual
+        if: github.event_name == 'workflow_dispatch'
+        uses: actions/checkout@v4.2.0
+        with:
+          ref: ${{ inputs.manifest_branch }}
+
+      - name: Checkout automatic from CI commit
+        if: github.event_name == 'workflow_run'
+        uses: actions/checkout@v4.2.0
+        with:
+          ref: ${{ github.event.workflow_run.head_sha }}
+
+      - name: Pick worker image
+        id: pick
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            IMAGE_TAG="${{ inputs.image_tag }}"
+            NAMESPACE="${{ inputs.namespace }}"
+          else
+            BRANCH="${{ github.event.workflow_run.head_branch }}"
+            SHA="${{ github.event.workflow_run.head_sha }}"
+            SHORT_SHA="${SHA:0:12}"
+
+            BRANCH_TAG="$(echo "$BRANCH" \
+              | tr '[:upper:]' '[:lower:]' \
+              | sed 's#[^a-z0-9_.-]#-#g')"
+
+            IMAGE_TAG="${BRANCH_TAG}-${SHORT_SHA}"
+            NAMESPACE="$DEFAULT_NAMESPACE"
+          fi
+
+          if [ -z "$NAMESPACE" ]; then
+            NAMESPACE="$DEFAULT_NAMESPACE"
+          fi
+
+          WORKER_IMAGE="${IMAGE_REPOSITORY}:${IMAGE_TAG}"
+
+          echo "IMAGE_TAG=$IMAGE_TAG" >> "$GITHUB_ENV"
+          echo "WORKER_IMAGE=$WORKER_IMAGE" >> "$GITHUB_ENV"
+          echo "NAMESPACE=$NAMESPACE" >> "$GITHUB_ENV"
+
+          echo "image_tag=$IMAGE_TAG" >> "$GITHUB_OUTPUT"
+          echo "worker_image=$WORKER_IMAGE" >> "$GITHUB_OUTPUT"
+          echo "namespace=$NAMESPACE" >> "$GITHUB_OUTPUT"
+
+          echo "Deploy namespace: $NAMESPACE"
+          echo "Deploy tag: $IMAGE_TAG"
+          echo "Deploy image: $WORKER_IMAGE"
+
+      - name: Setup kubectl
+        uses: azure/setup-kubectl@v4
+
+      - name: Configure kubeconfig
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          mkdir -p "$HOME/.kube"
+
+          cat > "$HOME/.kube/config" <<'EOF'
+          ${{ secrets.KUBECONFIG }}
+          EOF
+
+          chmod 600 "$HOME/.kube/config"
+
+      - name: Check Kubernetes connectivity
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          echo "Current context:"
+          kubectl config current-context || true
+
+          SERVER="$(kubectl config view --minify -o jsonpath='{.clusters[0].cluster.server}')"
+          echo "Kubernetes API server: $SERVER"
+
+          echo ""
+          echo "Testing kubectl API access..."
+          kubectl version --request-timeout=15s
+          kubectl get ns --request-timeout=15s
+
+      - name: Render Kubernetes manifests
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          rm -rf "$K8S_RENDER_DIR"
+          mkdir -p "$K8S_RENDER_DIR"
+
+          cp -R "$K8S_SOURCE_DIR"/. "$K8S_RENDER_DIR"/
+
+          find "$K8S_RENDER_DIR" -type f \( -name "*.yaml" -o -name "*.yml" \) -print0 \
+            | xargs -0 sed -i \
+              -e "s|__IMAGE__|${WORKER_IMAGE}|g" \
+              -e "s|__NAMESPACE__|${NAMESPACE}|g"
+
+          echo "Manifests renderizados:"
+          find "$K8S_RENDER_DIR" -type f -maxdepth 1 -print
+
+          echo ""
+          echo "Imagens encontradas nos manifests:"
+          grep -Rni "image:" "$K8S_RENDER_DIR" || true
+
+      - name: Apply namespace
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          kubectl apply -f "$K8S_RENDER_DIR/namespace.yaml" --request-timeout=30s
+
+      - name: Apply worker manifests
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          if [ -f "$K8S_RENDER_DIR/configmap.yaml" ]; then
+            kubectl apply -f "$K8S_RENDER_DIR/configmap.yaml" --request-timeout=30s
+          fi
+
+          kubectl apply -f "$K8S_RENDER_DIR/cronjob.yaml" --request-timeout=30s
+
+      - name: Show CronJob
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          kubectl -n "$NAMESPACE" get cronjob "$CRONJOB_NAME" -o wide
+          kubectl -n "$NAMESPACE" describe cronjob "$CRONJOB_NAME"
+
+      - name: Run CronJob now
+        if: github.event_name == 'workflow_dispatch' && inputs.run_now == 'true'
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          JOB_NAME="${CRONJOB_NAME}-manual-${GITHUB_RUN_NUMBER}"
+
+          echo "Criando Job manual: $JOB_NAME"
+
+          kubectl -n "$NAMESPACE" create job "$JOB_NAME" \
+            --from=cronjob/"$CRONJOB_NAME"
+
+          echo ""
+          echo "Aguardando Job finalizar..."
+          kubectl -n "$NAMESPACE" wait \
+            --for=condition=complete \
+            job/"$JOB_NAME" \
+            --timeout=600s
+
+      - name: Show worker pods and jobs
+        if: always()
+        shell: bash
+        run: |
+          kubectl -n "$NAMESPACE" get cronjob || true
+          kubectl -n "$NAMESPACE" get jobs || true
+          kubectl -n "$NAMESPACE" get pods -l app=loteria-console -o wide || true
+
+      - name: Summary
+        if: always()
+        shell: bash
+        run: |
+          echo "## Deploy worker" >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          echo "Namespace: \`${NAMESPACE:-}\`" >> "$GITHUB_STEP_SUMMARY"
+          echo "Imagem: \`${WORKER_IMAGE:-}\`" >> "$GITHUB_STEP_SUMMARY"
+          echo "CronJob: \`${CRONJOB_NAME:-}\`" >> "$GITHUB_STEP_SUMMARY"

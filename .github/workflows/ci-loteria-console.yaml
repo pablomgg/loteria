@@ -1,4 +1,4 @@
-name: ci-api
+name: ci-loteria-console
 
 on:
   push:
