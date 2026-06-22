@@ -61,22 +61,31 @@ jobs:
         if: env.RUN_TEST == 'true'
         run: dotnet test ./backend/Loteria.sln --configuration Release --no-build --verbosity normal
 
-      - name: Capturar SHA do commit checado
-        id: sha
+      - name: Capturar metadados da imagem
+        id: image_meta
         shell: bash
-        run: echo "sha=$(git rev-parse --short=12 HEAD)" >> $GITHUB_OUTPUT
+        run: |
+          BRANCH_TAG="$(echo "${SELECTED_BRANCH}" \
+            | tr '[:upper:]' '[:lower:]' \
+            | sed 's#[^a-z0-9_.-]#-#g')"
+
+          echo "created=$(date -u +'%Y-%m-%dT%H:%M:%SZ')" >> "$GITHUB_OUTPUT"
+          echo "full_sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
+          echo "sha=$(git rev-parse --short=12 HEAD)" >> "$GITHUB_OUTPUT"
+          echo "branch_tag=$BRANCH_TAG" >> "$GITHUB_OUTPUT"
 
       - name: Montar lista de tags
         id: tags
         run: |
-          T1="${{ vars.REGISTRY_HOST }}/dev/loteria-console:${{ env.SELECTED_BRANCH }}-${{ steps.sha.outputs.sha }}"
+          T1="${{ vars.REGISTRY_HOST }}/dev/loteria-console:${{ steps.image_meta.outputs.branch_tag }}-${{ steps.image_meta.outputs.sha }}"
           if [ "${{ env.SELECTED_BRANCH }}" = "master" ]; then
             # master recebe também :latest global
             T2="${{ vars.REGISTRY_HOST }}/dev/loteria-console:latest"
           else
             # demais branches recebem <branch>-latest
-            T2="${{ vars.REGISTRY_HOST }}/dev/loteria-console:${{ env.SELECTED_BRANCH }}-latest"
+            T2="${{ vars.REGISTRY_HOST }}/dev/loteria-console:${{ steps.image_meta.outputs.branch_tag }}-latest"
           fi
+          
           echo "tags=$T1,$T2" >> $GITHUB_OUTPUT
 
       - name: Docker build validation
@@ -86,7 +95,16 @@ jobs:
           context: ./backend
           file: ./backend/Dockerfile
           push: false
-          tags: ${{ steps.tags.outputs.tags }}
+          tags: loteria-console:ci
+          build-args: |
+            IMAGE_TITLE=loteria-console
+            IMAGE_DESCRIPTION=Aplicação console para processamento diário da Loteria
+            IMAGE_AUTHORS=Pablo Morigi <info@morigi.tech>
+            IMAGE_VENDOR=Morigi Tech
+            IMAGE_VERSION=${{ env.SELECTED_BRANCH }}-${{ steps.image_meta.outputs.sha }}
+            IMAGE_REVISION=${{ steps.image_meta.outputs.full_sha }}
+            IMAGE_SOURCE=${{ github.server_url }}/${{ github.repository }}
+            IMAGE_CREATED=${{ steps.image_meta.outputs.created }}
 
       - name: Login Docker Registry
         if: github.event_name != 'pull_request'
@@ -104,6 +122,15 @@ jobs:
           file: ./backend/Dockerfile
           push: true
           tags: ${{ steps.tags.outputs.tags }}
+          build-args: |
+            IMAGE_TITLE=loteria-console
+            IMAGE_DESCRIPTION=Aplicação console para processamento diário da Loteria
+            IMAGE_AUTHORS=Pablo Morigi <info@morigi.tech>
+            IMAGE_VENDOR=Morigi Tech
+            IMAGE_VERSION=${{ env.SELECTED_BRANCH }}-${{ steps.image_meta.outputs.sha }}
+            IMAGE_REVISION=${{ steps.image_meta.outputs.full_sha }}
+            IMAGE_SOURCE=${{ github.server_url }}/${{ github.repository }}
+            IMAGE_CREATED=${{ steps.image_meta.outputs.created }}
 
       - name: Summary
         if: github.event_name != 'pull_request'
