@@ -1,0 +1,50 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Loteria.Console", "src\Loteria.Console\Loteria.Console.csproj", "{00DBCF3E-F99F-46B9-A513-A0E04329A0CE}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Loteria.Domain", "src\Loteria.Domain\Loteria.Domain.csproj", "{ACD98E9B-5115-4374-90C6-497B0B8DD0F2}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Loteria.Data", "src\Loteria.Data\Loteria.Data.csproj", "{CC515A3C-58D2-4499-98C0-ECCAFA0B4B25}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{2E2CFA0D-E237-496B-962B-286650015DFF}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "scripts", "scripts", "{DB8AC5BE-7758-4B32-B1D4-AAB988B46E11}"
+	ProjectSection(SolutionItems) = preProject
+		scripts\Dockerfile = scripts\Dockerfile
+		scripts\entrypoint.sh = scripts\entrypoint.sh
+		scripts\DDL.sql = scripts\DDL.sql
+		scripts\DML.sql = scripts\DML.sql
+	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Loteria.Analise.Console", "src\Loteria.Analise.Console\Loteria.Analise.Console.csproj", "{471D3EB9-3442-4F70-83F6-D0587952B254}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{00DBCF3E-F99F-46B9-A513-A0E04329A0CE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{00DBCF3E-F99F-46B9-A513-A0E04329A0CE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{00DBCF3E-F99F-46B9-A513-A0E04329A0CE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{00DBCF3E-F99F-46B9-A513-A0E04329A0CE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{ACD98E9B-5115-4374-90C6-497B0B8DD0F2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{ACD98E9B-5115-4374-90C6-497B0B8DD0F2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{ACD98E9B-5115-4374-90C6-497B0B8DD0F2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{ACD98E9B-5115-4374-90C6-497B0B8DD0F2}.Release|Any CPU.Build.0 = Release|Any CPU
+		{CC515A3C-58D2-4499-98C0-ECCAFA0B4B25}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CC515A3C-58D2-4499-98C0-ECCAFA0B4B25}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CC515A3C-58D2-4499-98C0-ECCAFA0B4B25}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CC515A3C-58D2-4499-98C0-ECCAFA0B4B25}.Release|Any CPU.Build.0 = Release|Any CPU
+		{471D3EB9-3442-4F70-83F6-D0587952B254}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{471D3EB9-3442-4F70-83F6-D0587952B254}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{471D3EB9-3442-4F70-83F6-D0587952B254}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{471D3EB9-3442-4F70-83F6-D0587952B254}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{00DBCF3E-F99F-46B9-A513-A0E04329A0CE} = {2E2CFA0D-E237-496B-962B-286650015DFF}
+		{CC515A3C-58D2-4499-98C0-ECCAFA0B4B25} = {2E2CFA0D-E237-496B-962B-286650015DFF}
+		{ACD98E9B-5115-4374-90C6-497B0B8DD0F2} = {2E2CFA0D-E237-496B-962B-286650015DFF}
+		{471D3EB9-3442-4F70-83F6-D0587952B254} = {2E2CFA0D-E237-496B-962B-286650015DFF}
+	EndGlobalSection
+EndGlobal
