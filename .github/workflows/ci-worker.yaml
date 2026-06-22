@@ -69,13 +69,13 @@ jobs:
       - name: Montar lista de tags
         id: tags
         run: |
-          T1="${{ vars.REGISTRY_HOST }}/loteria-console:${{ env.SELECTED_BRANCH }}-${{ steps.sha.outputs.sha }}"
+          T1="${{ vars.REGISTRY_HOST }}/dev/loteria-console:${{ env.SELECTED_BRANCH }}-${{ steps.sha.outputs.sha }}"
           if [ "${{ env.SELECTED_BRANCH }}" = "master" ]; then
             # master recebe também :latest global
-            T2="${{ vars.REGISTRY_HOST }}/loteria-console:latest"
+            T2="${{ vars.REGISTRY_HOST }}/dev/loteria-console:latest"
           else
             # demais branches recebem <branch>-latest
-            T2="${{ vars.REGISTRY_HOST }}/loteria-console:${{ env.SELECTED_BRANCH }}-latest"
+            T2="${{ vars.REGISTRY_HOST }}/dev/loteria-console:${{ env.SELECTED_BRANCH }}-latest"
           fi
           echo "tags=$T1,$T2" >> $GITHUB_OUTPUT
 
