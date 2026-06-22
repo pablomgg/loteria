@@ -1,0 +1,60 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: loteria-console-daily
+  namespace: ns-loteria
+spec:
+  # Todo dia às 03:00
+  schedule: "0 3 * * *"
+
+  # Usa timezone explícito para não depender do timezone do control-plane
+  timeZone: "America/Cuiaba"
+
+  # Evita rodar duas execuções ao mesmo tempo
+  concurrencyPolicy: Forbid
+
+  # Se o cluster ficou fora e perdeu o horário, ainda permite iniciar até 30 minutos depois
+  startingDeadlineSeconds: 1800
+
+  # Mantém histórico limpo
+  successfulJobsHistoryLimit: 3
+  failedJobsHistoryLimit: 3
+
+  # false = ativo. true = pausa o agendamento
+  suspend: false
+
+  jobTemplate:
+    spec:
+      # Quantas tentativas o Job pode fazer se a aplicação retornar erro
+      backoffLimit: 1
+
+      # Mata o Job se passar de 1 hora rodando
+      activeDeadlineSeconds: 3600
+
+      # Remove Jobs antigos automaticamente depois de 2 dias
+      ttlSecondsAfterFinished: 172800
+
+      template:
+        metadata:
+          labels:
+            app: loteria-console
+        spec:
+          restartPolicy: Never
+          containers:
+            - name: loteria-console
+              image: __IMAGE__
+              imagePullPolicy: IfNotPresent
+
+              envFrom:
+                - configMapRef:
+                    name: loteria-console-config
+                - secretRef:
+                    name: loteria-console-secret
+
+              resources:
+                requests:
+                  cpu: "50m"
+                  memory: "128Mi"
+                limits:
+                  cpu: "500m"
+                  memory: "512Mi"
